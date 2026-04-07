@@ -112,7 +112,7 @@ rec.similar_movies(movie_id=1, top_k=5)  # Movies similar to a given movie
 
 | Paper | Ours |
 |:---:|:---:|
-| ![](assets/paper_fig1_movielens.png) | ![](results/movielens/fig1_rmse_iterations_movielens.png) |
+| ![](results/Screenshot 2026-04-07 103533.png) | ![](results/movielens/fig1_rmse_iterations_movielens.png) |
 
 ### Fig 2 — AnimeReco dataset
 
