@@ -17,6 +17,13 @@ Replication of:
 │   ├── recommender.py            # MovieLens + Anime — training, experiments, recommendations
 │   └── netflix_experiments.py   # Netflix — separate script (large dataset)
 │
+├── data/
+│   └── Dataset.txt               # Dataset download instructions / links
+│
+├── docs/
+│   ├── Paper 23.pdf              # Original paper (Mugdho & Imtiaz, 2023)
+│   └── summary.docx              # Project summary document
+│
 ├── results/                      # All figures (paper screenshots + our reproductions)
 ├── requirements.txt
 ├── .gitignore
