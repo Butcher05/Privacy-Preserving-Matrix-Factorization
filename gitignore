@@ -1,0 +1,25 @@
+# Datasets (too large for GitHub)
+ml-1m/
+archive/
+archive (1)/
+
+# Saved model weights (too large)
+outputs/*.pkl
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+.venv
+venv/
+
+# PyCharm
+.idea/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
