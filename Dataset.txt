@@ -1,3 +1,0 @@
-1. Movielens- https://grouplens.org/datasets/movielens/1m/
-2. Netflix- https://www.kaggle.com/datasets/netflix-inc/netflix-prize-data
-3. Anime- https://www.kaggle.com/datasets/CooperUnion/anime-recommendations-database
