@@ -106,7 +106,7 @@ rec.similar_movies(movie_id=1, top_k=5)  # Movies similar to a given movie
 ### Fig 1 — MovieLens 1M
 | Paper | Ours |
 |:---:|:---:|
-| ![](results/Screenshot%202026-04-07%20100706.png) | ![](results/fig1_rmse_iter_movielens.png) |
+| ![](results/Screenshot%2026-04-07%103533.png) | ![](results/fig1_rmse_iter_movielens.png) |
 
 ### Fig 2 — AnimeReco dataset
 | Paper | Ours |
