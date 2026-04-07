@@ -118,13 +118,13 @@ rec.similar_movies(movie_id=1, top_k=5)  # Movies similar to a given movie
 
 | Paper | Ours |
 |:---:|:---:|
-| ![](assets/paper_fig2_anime.png) | ![](results/anime/fig1_rmse_iterations_anime.png) |
+| ![](results/Screenshot 2026-04-07 103542.png) | ![](results/anime/fig1_rmse_iterations_anime.png) |
 
 ### Fig 3 — Netflix dataset
 
 | Paper | Ours |
 |:---:|:---:|
-| ![](assets/paper_fig3_netflix.png) | ![](results/netflix/fig1_rmse_iterations_netflix.png) |
+| ![](results/Screenshot 2026-04-07 103538.png) | ![](results/netflix/fig1_rmse_iterations_netflix.png) |
 
 ---
 
