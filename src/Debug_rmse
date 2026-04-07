@@ -1,0 +1,107 @@
+"""
+DEBUG SCRIPT - run this first to diagnose why RMSE is stuck at 3.76
+"""
+import numpy as np
+import pandas as pd
+import torch
+import os
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f"Device: {device}\n")
+
+BASE = "D:/College/YEAR 3/SEM 6/Recommendation System/project"
+
+# Load MovieLens
+path = os.path.join(BASE, "ml-1m", "ratings.dat")
+df = pd.read_csv(path, sep="::", engine="python",
+                 names=["user", "movie", "rating", "timestamp"],
+                 dtype={"user": int, "movie": int, "rating": float})
+df = df[["user", "movie", "rating"]]
+print(f"Ratings loaded: {len(df):,}")
+print(f"Rating range: {df['rating'].min()} to {df['rating'].max()}")
+print(f"Mean rating: {df['rating'].mean():.4f}")
+
+# Preprocess
+users  = {u: i for i, u in enumerate(df["user"].unique())}
+movies = {m: i for i, m in enumerate(df["movie"].unique())}
+df["user"]  = df["user"].map(users)
+df["movie"] = df["movie"].map(movies)
+n_users, n_movies = len(users), len(movies)
+print(f"\nMatrix: {n_movies} movies x {n_users} users")
+
+V = np.zeros((n_movies, n_users), dtype=np.float32)
+R = np.zeros((n_movies, n_users), dtype=np.float32)
+for row in df.itertuples(index=False):
+    V[row.movie, row.user] = row.rating
+    R[row.movie, row.user] = 1.0
+
+# Train/test split
+rng = np.random.default_rng(42)
+rows, cols = np.where(R == 1)
+idx = np.arange(len(rows)); rng.shuffle(idx)
+split = int(len(idx) * 0.1)
+R_test  = np.zeros_like(R); R_test[rows[idx[:split]],  cols[idx[:split]]]  = 1.0
+R_train = np.zeros_like(R); R_train[rows[idx[split:]], cols[idx[split:]]] = 1.0
+print(f"Train: {int(R_train.sum()):,}  Test: {int(R_test.sum()):,}")
+
+# Move to GPU
+V_t       = torch.tensor(V,       dtype=torch.float32, device=device)
+R_train_t = torch.tensor(R_train, dtype=torch.float32, device=device)
+R_test_t  = torch.tensor(R_test,  dtype=torch.float32, device=device)
+
+# Init
+torch.manual_seed(42)
+n = 20
+X     = torch.randn(n_movies, n, device=device)
+Theta = torch.randn(n_users,  n, device=device)
+X     = X     / (torch.linalg.norm(X,     dim=1, keepdim=True) + 1e-12)
+Theta = Theta / (torch.linalg.norm(Theta, dim=1, keepdim=True) + 1e-12)
+
+print(f"\n--- INITIAL STATE ---")
+V_hat = X @ Theta.T
+print(f"V_hat range:  {V_hat.min().item():.4f} to {V_hat.max().item():.4f}")
+print(f"V_hat mean:   {V_hat.mean().item():.4f}")
+print(f"V (train) range: {V_t[R_train_t.bool()].min().item():.4f} to {V_t[R_train_t.bool()].max().item():.4f}")
+
+residual = (V_hat - V_t) * R_train_t
+print(f"Residual range: {residual.min().item():.4f} to {residual.max().item():.4f}")
+print(f"Residual mean:  {residual.mean().item():.4f}")
+print(f"Residual norm:  {torch.linalg.norm(residual).item():.4f}")
+
+lam = 0.01
+grad_X  = residual @ Theta + lam * X
+grad_Th = residual.T @ X   + lam * Theta
+print(f"\ngrad_X  norm: {torch.linalg.norm(grad_X).item():.6f}")
+print(f"grad_Th norm: {torch.linalg.norm(grad_Th).item():.6f}")
+
+mu = 0.0005
+print(f"\n--- AFTER 1 UPDATE (mu={mu}) ---")
+X_new     = X     - mu * grad_X
+Theta_new = Theta - mu * grad_Th
+V_hat_new = X_new @ Theta_new.T
+residual_new = (V_hat_new - V_t) * R_train_t
+print(f"New residual norm: {torch.linalg.norm(residual_new).item():.4f}")
+
+# RMSE on test
+diff = V_hat_new[R_test_t.bool()] - V_t[R_test_t.bool()]
+rmse = float(torch.sqrt((diff**2).mean()).item())
+print(f"RMSE after 1 iter: {rmse:.4f}")
+
+# Try with scaled mu
+mu_scaled = mu / n_movies
+print(f"\n--- AFTER 1 UPDATE (mu_scaled = mu/n_movies = {mu_scaled:.8f}) ---")
+X_new2     = X     - mu_scaled * grad_X
+Theta_new2 = Theta - mu_scaled * grad_Th
+V_hat_new2 = X_new2 @ Theta_new2.T
+diff2 = V_hat_new2[R_test_t.bool()] - V_t[R_test_t.bool()]
+rmse2 = float(torch.sqrt((diff2**2).mean()).item())
+print(f"RMSE after 1 iter (scaled): {rmse2:.4f}")
+
+print(f"\n--- WHAT MU VALUE IS NEEDED? ---")
+for test_mu in [0.0005, 0.001, 0.005, 0.01, 0.05, 0.1, 1.0]:
+    X_t     = X     - test_mu * grad_X
+    Theta_t = Theta - test_mu * grad_Th
+    V_t2    = X_t @ Theta_t.T
+    diff_t  = V_t2[R_test_t.bool()] - V_t[R_test_t.bool()]
+    r       = float(torch.sqrt((diff_t**2).mean()).item())
+    print(f"  mu={test_mu:.4f}  ->  RMSE={r:.4f}")
