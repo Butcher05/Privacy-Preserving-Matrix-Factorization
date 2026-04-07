@@ -2,7 +2,9 @@
 # About
 Mugdho & Imtiaz (2023) address a core privacy risk in recommendation systems: if someone gains access to a trained model, they may be able to reverse-engineer individual users' rating histories. Their solution is a differentially private variant of matrix factorization, where the rating matrix is approximated as a product of a movie-profile matrix X and a user-profile matrix Theta. At every training iteration, Gaussian noise is injected into the user gradient with standard deviation σ = (τ·C/ε_i)·√(2·ln(1.25/δ)), masking each user's individual contribution. Privacy costs accumulate across iterations and are tracked via Rényi DP composition, giving a closed-form overall ε. The paper studies the resulting privacy-utility tradeoff across three datasets — MovieLens 1M, Netflix Prize, and Anime Recommendations — sweeping per-iteration privacy budget ε_i, latent dimension n, and step size μ.
 
-We reconstructed the full implementation from scratch using PyTorch for GPU acceleration, since the paper only provides pseudocode. This involved building sparse-to-dense data pipelines, a pause/resume training system, and a separate Netflix script to handle the dataset's size within 8GB VRAM. All 27 figures from the paper are reproduced and compared side-by-side below.
+We reconstructed the full implementation from scratch using PyTorch for GPU acceleration, since the paper only provides pseudocode. This involved building sparse-to-dense data pipelines, a pause/resume training system, and a separate Netflix script to handle the dataset's size within 8GB VRAM. All 15+ figures from the paper are reproduced and compared side-by-side below.
+
+
 Replication of:
 > **"Privacy-Preserving Matrix Factorization for Recommendation Systems using Gaussian Mechanism"**
 > Mugdho & Imtiaz (2023) — [arXiv:2304.09096](https://arxiv.org/abs/2304.09096)
